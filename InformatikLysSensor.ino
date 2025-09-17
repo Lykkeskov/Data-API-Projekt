@@ -1,3 +1,4 @@
+//Brug WEMOS D1 MINI ESP32
 // Pins for lys sensor 1 og 2
 const int  LysSensorPin1 = 34;
 
