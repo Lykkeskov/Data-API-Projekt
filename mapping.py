@@ -1,37 +1,32 @@
-import plotly
-import pandas as pd
+import plotly.express as px
 
-floor1 = "static/plan1.png"
-floor2 = "static/plan2.png"
-floor3 = "static/plan3.png"
-floor4 = "static/plan4.png"
+class PlanKort:
+    def __init__(self, etage_data, billededata):
+        self.floor_image = etage_data
+        self.data = billededata
 
-billededata = pd.DataFrame({
-    'etage':[floor1, floor2, '''floor3,floor4'''],
-    'lokale':["D2111","D2221"],
-    'x':[50,60],
-    'y':[50,60]
-})
+    def lav_figur(self):
+        # scatter points
+        fig = px.scatter(
+            self.data,
+            x="x", y="y",
+            color="lys_niveau",
+            text="lokale",
+            color_continuous_scale="YlOrRd"
+        )
 
-etage = 1
-etage_data = billededata[billededata["etage"] == etage]
-
-fig = px.scatter(
-    etage_data,
-    x="x", y="y",
-    color="lys_niveau",
-    text="lokale",
-    color_continuous_scale="YlOrRd"
-)
-
-fig.update_layout(
-    billeder=[dict(
-        source=etage_data,
-        x_reference="x",
-        y_reference="y",
-        x=0, y=300,
-        sizex=300, sizey=300,
-        sizing="stretch",
-        layer="below"
-    )]
-)
+        # vis plantegning som baggrund
+        fig.update_layout(
+            images=[dict(
+                source=self.floor_image,
+                xref="x",
+                yref="y",
+                x=0, y=300,
+                sizex=300, sizey=300,
+                sizing="stretch",
+                layer="below"
+            )],
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False)
+        )
+        return fig
