@@ -1,4 +1,10 @@
 import plotly.express as px
+from PIL import Image
+
+# hent billedets dimensioner
+img = Image.open("static/plan1.png")
+#{{ url_for('static', filename='style.css') }}
+width, height = img.size
 
 class PlanKort:
     def __init__(self, etage_data, billededata):
@@ -21,12 +27,12 @@ class PlanKort:
                 source=self.floor_image,
                 xref="x",
                 yref="y",
-                x=0, y=300,
-                sizex=300, sizey=300,
+                x=0, y=height,
+                sizex=width, sizey=height,
                 sizing="stretch",
                 layer="below"
             )],
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False)
+            xaxis=dict(visible=False, range=[0, width]),
+            yaxis=dict(visible=False, range=[0, height], scaleanchor="x"),
         )
         return fig

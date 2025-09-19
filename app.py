@@ -10,8 +10,8 @@ def index():
     billededata = pd.DataFrame({
         # 'etage': [floor1, floor2, '''floor3,floor4'''],
         'lokale': ["D2111", "D2221"],
-        'x': [1387, 150],
-        'y': [394, 120],
+        'x': [1392, 150],
+        'y': [2914, 120],
         'lys_niveau': [300, 150]
     })
 
