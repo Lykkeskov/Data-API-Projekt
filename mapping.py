@@ -27,9 +27,8 @@ class PlanKort:
                 source=self.floor_image,
                 xref="x",
                 yref="y",
-                x=0, y=height,
-                sizex=width, sizey=height,
-                sizing="stretch",
+                x = 0, y = height,
+                sizex = width, sizey = height,
                 layer="below"
             )],
             xaxis=dict(visible=False, range=[0, width]),
