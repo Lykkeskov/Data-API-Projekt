@@ -1,70 +1,34 @@
-from socket import gethostname
-import sqlite3
-from flask import Flask, request, jsonify
+from flask import Flask, render_template
+import pandas as pd
+from mapping import PlanKort
 
-# Initialize Flask app
 app = Flask(__name__)
 
-def initDB():
-    # Initialize database and create table if it doesn't exist
-    conn = sqlite3.connect('items.db')  # this will create 'items.db' if it doesn't exist
-    cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)")
-    # Insert some sample data if the table is empty
-    cursor.execute("SELECT COUNT(*) FROM items")
-    count = cursor.fetchone()[0]
-    if count == 0:
-        cursor.execute("INSERT INTO items (name) VALUES ('Sample Item 1')")
-        cursor.execute("INSERT INTO items (name) VALUES ('Sample Item 2')")
-        cursor.execute("INSERT INTO items (name) VALUES ('Sample Item 3')")
-        conn.commit()
-    conn.close()
-
-
 @app.route('/')
-def home():
-    return "HELLO WORLD"
+def index():
+    # lokale data
+    billededata = pd.DataFrame({
+        # 'etage': [floor1, floor2, '''floor3,floor4'''],
+        'lokale': ["D2111", "D2221"],
+        'x': [1392, 150],
+        'y': [2914, 120],
+        'lys_niveau': [300, 150]
+    })
 
-@app.route('/items', methods=['POST'])
-def create_item():
-    data = request.get_json()
+    source = "/static/plan1.png"
+    floor2 = "static/plan2.png"
+    floor3 = "static/plan3.png"
+    floor4 = "static/plan4.png"
 
-    # Validate input
-    if not data or 'name' not in data:
-        return jsonify({'error': 'Missing "name" in request data'}), 400
+    # lav plankort objekt
+    fm = PlanKort(source, billededata)
+    fig = fm.lav_figur()
 
-    name = data['name']
+    # konverter plankort til html så vi kan website stuff
+    graph_html = fig.to_html(full_html = False)
 
-    # Insert into database
-    conn = sqlite3.connect('items.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO items (name) VALUES (?)", (name,))
-    conn.commit()
+    return render_template("index.html", graph_html=graph_html)
 
-    # Get the ID of the new item
-    item_id = cursor.lastrowid
-    conn.close()
-
-    new_item = {'id': item_id, 'name': name}
-    return jsonify(new_item), 201
-
-# Define the GET /items endpoint
-@app.route('/items', methods=['GET'])
-def get_items():
-    # Connect to the database and fetch all items
-    conn = sqlite3.connect('items.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM items")
-    rows = cursor.fetchall()
-    conn.close()
-    # Convert the query result into a list of dictionaries
-    items = []
-    for row in rows:
-        items.append({"id": row[0], "name": row[1]})
-    # Return the list of items as JSON
-    return jsonify(items)
-
+# kør den app der
 if __name__ == '__main__':
-    initDB()
-    if 'liveconsole' not in gethostname():
-        app.run()
+    app.run(debug=True)
