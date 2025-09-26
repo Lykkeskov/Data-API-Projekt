@@ -5,14 +5,14 @@ const int lysSensorPin1 = 34;
 const int buttonPin = 19;
 const int ledPin = 18;
  
-const int delayTime = 1000;
+const int delayTime = 3000;
 unsigned long previousMillis = 0;
 
 bool ledState = LOW;
 
-const char* ssid = "YOUR_WIFI";
-const char* password = "YOUR_PASSWORD";
-const char* server = "http://yourusername.pythonanywhere.com/data";
+const char* ssid = "Tobias_iPhone";
+const char* password = "iPhoneNet";
+const char* server = "https://halfdan.pythonanywhere.com/data";
 
 void setup() {
   Serial.begin(115200);
@@ -23,6 +23,8 @@ void setup() {
     Serial.println("Connecting...");
   }
   Serial.println("Connected to WiFi");
+  Serial.print("IP is ");
+  Serial.println(WiFi.localIP());
 
   // Sæt sensorer til at være inputs
   pinMode(buttonPin, INPUT_PULLUP);
@@ -45,7 +47,7 @@ void loop() {
       http.begin(server);
       http.addHeader("Content-Type", "application/json");
 
-      String json = "{\"temperature\":25.5, \"humidity\":60}";
+      String json = "{\"lokale\":211, \"lysniveau\":67}";
       int httpResponseCode = http.POST(json);
 
       Serial.print("Response: ");
@@ -53,6 +55,5 @@ void loop() {
 
       http.end();
     }
-    delay(5000);
   }
 }
