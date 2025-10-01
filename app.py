@@ -8,25 +8,27 @@ app = Flask(__name__)
 def index():
     # lokale data
     billededata = pd.DataFrame({
-        # 'etage': [floor1, floor2, '''floor3,floor4'''],
-        'lokale': ["D2111", "D2221"],
-        'x': [1392, 150],
-        'y': [2914, 120],
-        'lys_niveau': [300, 150]
+        'etage': [1, 1, 2, 2],
+        'lokale': ["D2111", "D2221", "D2321", "D2401"],
+        'x': [1392, 150, 1400, 60],
+        'y': [2914, 120, 70, 400],
+        'lys_niveau': [300, 150, 500, 299]
     })
 
-    source = "/static/plan1.png"
-    floor2 = "static/plan2.png"
-    floor3 = "static/plan3.png"
-    floor4 = "static/plan4.png"
+    etager = {
+        1: "static/plan1.png",
+        2: "static/plan2.png",
+        3: "static/plan3.png",
+        4: "static/plan4.png"
+    }
+
 
     # lav plankort objekt
-    fm = PlanKort(source, billededata)
+    fm = PlanKort(etager, billededata)
     fig = fm.lav_figur()
 
     # konverter plankort til html så vi kan website stuff
     graph_html = fig.to_html(full_html = False)
-
     return render_template("index.html", graph_html=graph_html)
 
 # kør den app der
