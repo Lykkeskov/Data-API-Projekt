@@ -17,7 +17,7 @@ class PlanKort:
     def lav_figur(self):
         fig = go.Figure()
 
-        # tilføj en scatter trace per floor
+        # tilføj en scatter trace per etage
         for i, (floor, path) in enumerate(self.etager.items()):
             etage_data = self.data[self.data["etage"] == floor]
             width, height = self.image_sizes[floor]

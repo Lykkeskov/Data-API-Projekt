@@ -27,7 +27,7 @@ def index():
     fm = PlanKort(etager, billededata)
     fig = fm.lav_figur()
 
-    # konverter plankort til html så vi kan website stuff
+    # konverter plankort til html så vi kan website stuff :)
     graph_html = fig.to_html(full_html = False)
     return render_template("index.html", graph_html=graph_html)
 
