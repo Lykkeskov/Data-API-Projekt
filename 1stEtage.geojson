@@ -4,18 +4,6 @@
     {
       "type": "Feature",
       "geometry": {
-        "type": "Point",
-        "coordinates": [0.0000, 0.0000]
-      },
-      "properties": {
-        "room": "101",
-        "building": "Building A",
-        "floor": "1"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
@@ -34,20 +22,8 @@
       "properties": {
         "room": "D2111",
         "floor": "1",
-        "lysniveau":"Dårlig"
+        "lysniveau":"7"
 
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [0.0010, 0.0010]
-      },
-      "properties": {
-        "room": "103",
-        "building": "Building A",
-        "floor": "1"
       }
     },
     {
@@ -73,18 +49,6 @@
     {
       "type": "Feature",
       "geometry": {
-        "type": "Point",
-        "coordinates": [0.0020, 0.0020]
-      },
-      "properties": {
-        "room": "201",
-        "building": "Building A",
-        "floor": "2"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
@@ -98,18 +62,6 @@
       },
       "properties": {
         "room": "202",
-        "building": "Building A",
-        "floor": "2"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [0.0030, 0.0030]
-      },
-      "properties": {
-        "room": "203",
         "building": "Building A",
         "floor": "2"
       }
@@ -132,18 +84,6 @@
         "room": "204",
         "building": "Building A",
         "floor": "2"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [0.0040, 0.0040]
-      },
-      "properties": {
-        "room": "301",
-        "building": "Building A",
-        "floor": "3"
       }
     },
     {
