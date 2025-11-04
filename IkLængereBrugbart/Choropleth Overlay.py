@@ -9,12 +9,12 @@ import plotly.graph_objects as go
 pio.renderers.default = "browser"
 
 #Data formateres som variabler
-lokaleLokationer = json.load(open('1stEtage.geojson'))
+lokaleLokationer = json.load(open('../1stEtage.geojson'))
 lokaleData = {}
 for feature in lokaleLokationer['features']:
     feature['id'] = feature["properties"]["room"]
 
-lysData = pd.read_csv("sejedata.csv")
+lysData = pd.read_csv("../sejedata.csv")
 lysData.rename(columns={"lokale": "room"}, inplace=True)
 
 
@@ -70,7 +70,7 @@ for feature in lokaleLokationer["features"]:
             afstand = (lys_value - halvLysNiveau) * 255/halvLysNiveau
             fillcolor = f"rgba({int(255-afstand)}, {int(255)}, {int(0)}, {1})"
     else:
-        fillcolor = "rgba(200,200,200,0.3)"
+        fillcolor = "rgba(0,0,0,1)"
 
     x, y = zip(*coords)
     fig.add_trace(go.Scatter(

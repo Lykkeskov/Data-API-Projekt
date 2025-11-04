@@ -8,11 +8,11 @@ app = Flask(__name__)
 def index():
     # lokale data
     billededata = pd.DataFrame({
-        'etage': [1, 1, 2, 2],
+        'etage': [1, 2, 3, 4],
         'lokale': ["D2111", "D2221", "D2321", "D2401"],
-        'x': [1392, 150, 1400, 60],
-        'y': [2914, 120, 70, 400],
-        'lys_niveau': [300, 150, 500, 299]
+        'x': [1392, 1000, 1400, 60],
+        'y': [2914, 1200, 70, 400],
+        'lys_niveau': [300, 1000, 500, 299]
     })
 
     etager = {
