@@ -50,7 +50,7 @@ void loop() {
 
     // Read light level
     int lysniveau = analogRead(34);
-    int lokale = 211;
+    int lokale = 111;
 
     sendData(lokale, lysniveau);
   }
@@ -63,10 +63,10 @@ void sendData(int lokale, int lysniveau) {
     http.addHeader("Content-Type", "application/json");
 
     // Build JSON payload
-    String json = "{\"lokale\":";
-    json += lokale;
+    String json = "{\"lokale\": D2";
+    json += String(lokale);
     json += ",\"lysniveau\":";
-    json += lysniveau;
+    json += String(lysniveau);
     json += "}";
 
     Serial.print("Sending data: ");
