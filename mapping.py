@@ -1,9 +1,8 @@
 import pandas as pd
 import json
-import plotly.express as px
-import plotly.io as pio
-from PIL import Image
+import sqlite3 as sql
 import plotly.graph_objects as go
+from PIL import Image
 
 class PlanKort:
     def __init__(self, etage_data: dict, billededata: pd.DataFrame):
@@ -11,29 +10,29 @@ class PlanKort:
         self.data = billededata
         self.image_sizes = {}
 
-        # find størrelser for hver etage
+        # Find størrelse for hver etage
         for floor, path in self.etager.items():
-            img = Image.open(path)  # skal være filsystem path fx "static/plan1.png"
+            img = Image.open(path)  # fx "static/plan1.png"
             self.image_sizes[floor] = img.size
 
     def lav_figur(self):
         choropleth = go.Figure()
 
+        # --- Load geojson (lokaler) ---
         lokaleLokationer = json.load(open('1stEtage.geojson'))
-        lokaleData = {}
         for feature in lokaleLokationer['features']:
             feature['id'] = feature["properties"]["room"]
 
-        lysData = pd.read_csv("sejedata.csv")
-        lysData.rename(columns={"lokale": "room"}, inplace=True)
+        # --- Hent lysdata fra SQLite i stedet for CSV ---
+        conn = sql.connect("Lysniveau.db")
+        lysData = pd.read_sql_query("SELECT etage, lokale AS room, x, y, lys_niveau FROM lokaledata", conn)
+        conn.close()
 
-        maxLysNiveau = 300
-        if lysData["lys_niveau"].max() > maxLysNiveau:
-            maxLysNiveau = lysData["lys_niveau"].max()
-
+        # --- Find max og halv lysniveau ---
+        maxLysNiveau = max(300, lysData["lys_niveau"].max())
         halvLysNiveau = maxLysNiveau / 2
 
-        # tilføj en scatter trace per etage
+        # --- Add scatter traces for each floor ---
         for i, (floor, path) in enumerate(self.etager.items()):
             etage_data = self.data[self.data["etage"] == floor]
             width, height = self.image_sizes[floor]
@@ -50,15 +49,25 @@ class PlanKort:
                     colorbar=dict(title="Lys niveau", x=1.5, y=0.5) if i == 0 else None
                 ),
                 name=f"Etage {floor}",
-                visible=(i == 0)  # start med at vise stueetagen
+                visible=(i == 0)  # Kun første etage vises som standard
             ))
 
-        maxLysNiveau = 300
-        if lysData["lys_niveau"].max() > maxLysNiveau:
-            maxLysNiveau = lysData["lys_niveau"].max()
+        # --- Add første etages baggrundsbillede én gang ---
+        first_floor, first_path = list(self.etager.items())[0]
+        first_width, first_height = self.image_sizes[first_floor]
+        choropleth.add_layout_image(
+            dict(
+                source=f"/{first_path}",
+                xref="x",
+                yref="y",
+                x=0, y=first_height,
+                sizex=first_width, sizey=first_height,
+                sizing="stretch",
+                layer="below"
+            )
+        )
 
-
-        # dropdown menu
+        # --- Dropdown-menu opsætning ---
         updatemenus = [dict(
             buttons=[],
             direction="down",
@@ -66,29 +75,13 @@ class PlanKort:
             x=0.1, y=1.15
         )]
 
-
-
+        # --- For hver etage: tilføj knap, polygoner og opdateringslogik ---
         for i, (floor, path) in enumerate(self.etager.items()):
             width, height = self.image_sizes[floor]
-
-            # vis kun den her etage
             visibility = [False] * len(self.etager)
             visibility[i] = True
 
-            first_floor, first_path = list(self.etager.items())[0]
-            width, height = self.image_sizes[first_floor]
-            choropleth.add_layout_image(
-                dict(
-                    source=f"/{first_path}",
-                    xref="x",
-                    yref="y",
-                    x=0, y=height,
-                    sizex=2339, sizey=3309,
-                    sizing="stretch",
-                    layer="below"
-                )
-            )
-
+            # Tilføj dropdown-knap for denne etage
             updatemenus[0]["buttons"].append(dict(
                 label=f"Etage {floor}",
                 method="update",
@@ -99,7 +92,7 @@ class PlanKort:
                         xref="x",
                         yref="y",
                         x=0, y=height,
-                        sizex=2339, sizey=3309,
+                        sizex=width, sizey=height,
                         sizing="stretch",
                         layer="below"
                     )],
@@ -108,37 +101,37 @@ class PlanKort:
                     }
                 ]
             ))
+
+            # Tilføj rum-polygons (farvet efter lysniveau)
             for feature in lokaleLokationer["features"]:
                 coords = feature["geometry"]["coordinates"][0]
                 room = feature["properties"]["room"]
 
-                if room in lysData["room"].values:
-                    lys_value = lysData.loc[lysData["room"] == room, "lys_niveau"].values[0]
-                else:
-                    lys_value = None
+                lys_value = lysData.loc[lysData["room"] == room, "lys_niveau"].values[0] \
+                    if room in lysData["room"].values else None
 
                 if lys_value is not None:
                     if lys_value <= halvLysNiveau:
                         afstand = (halvLysNiveau - lys_value) * 255 / halvLysNiveau
-                        fillcolor = f"rgba({int(255)}, {int(255 - afstand)}, {int(0)}, {1})"
-
-                    if lys_value > halvLysNiveau:
+                        fillcolor = f"rgba(255, {int(255 - afstand)}, 0, 1)"
+                    else:
                         afstand = (lys_value - halvLysNiveau) * 255 / halvLysNiveau
-                        fillcolor = f"rgba({int(255 - afstand)}, {int(255)}, {int(0)}, {1})"
+                        fillcolor = f"rgba({int(255 - afstand)}, 255, 0, 1)"
                 else:
                     fillcolor = "rgba(0,0,0,1)"
 
                 x, y = zip(*coords)
                 choropleth.add_trace(go.Scatter(
-                    x=x,
-                    y=y,
+                    x=x, y=y,
                     fill="toself",
                     fillcolor=fillcolor,
                     line=dict(color="black"),
                     name=room,
                     text=f"{room}: {lys_value}",
-                    hoverinfo="text"
+                    hoverinfo="text",
+                    visible=(i == 0)  # vis kun polygoner for første etage
                 ))
 
+        # --- Tilføj dropdown-menu til layout ---
         choropleth.update_layout(updatemenus=updatemenus)
         return choropleth
