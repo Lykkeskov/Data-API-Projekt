@@ -12,27 +12,27 @@ class PlanKort:
 
         # Find størrelse for hver etage
         for floor, path in self.etager.items():
-            img = Image.open(path)  # fx "static/plan1.png"
+            img = Image.open(path)
             self.image_sizes[floor] = img.size
 
     def lav_figur(self):
         choropleth = go.Figure()
 
-        # --- Load geojson (lokaler) ---
+        #Load geojson (lokaler)
         lokaleLokationer = json.load(open('1stEtage.geojson'))
         for feature in lokaleLokationer['features']:
             feature['id'] = feature["properties"]["room"]
 
-        # --- Hent lysdata fra SQLite i stedet for CSV ---
+        # Hent lysdata fra SQLite i stedet for CSV
         conn = sql.connect("Lysniveau.db")
         lysData = pd.read_sql_query("SELECT etage, lokale AS room, x, y, lys_niveau FROM lokaledata", conn)
         conn.close()
 
-        # --- Find max og halv lysniveau ---
+        # Find maks og halv lysniveau
         maxLysNiveau = max(300, lysData["lys_niveau"].max())
         halvLysNiveau = maxLysNiveau / 2
 
-        # --- Add scatter traces for each floor ---
+        # Tilføj scatter traces til hevr etage
         for i, (floor, path) in enumerate(self.etager.items()):
             etage_data = self.data[self.data["etage"] == floor]
             width, height = self.image_sizes[floor]
@@ -52,7 +52,7 @@ class PlanKort:
                 visible=(i == 0)  # Kun første etage vises som standard
             ))
 
-        # --- Add første etages baggrundsbillede én gang ---
+        # Tilføj første etages baggrundsbillede en gang
         first_floor, first_path = list(self.etager.items())[0]
         first_width, first_height = self.image_sizes[first_floor]
         choropleth.add_layout_image(
@@ -67,7 +67,7 @@ class PlanKort:
             )
         )
 
-        # --- Dropdown-menu opsætning ---
+        # Dropdown-menu
         updatemenus = [dict(
             buttons=[],
             direction="down",
@@ -75,7 +75,7 @@ class PlanKort:
             x=0.1, y=1.15
         )]
 
-        # --- For hver etage: tilføj knap, polygoner og opdateringslogik ---
+        # For hver etage: tilføj knap, polygoner og opdateringslogik
         for i, (floor, path) in enumerate(self.etager.items()):
             width, height = self.image_sizes[floor]
             visibility = [False] * len(self.etager)
@@ -132,6 +132,6 @@ class PlanKort:
                     visible=(i == 0)  # vis kun polygoner for første etage
                 ))
 
-        # --- Tilføj dropdown-menu til layout ---
+        # ilføj dropdown-menu til layout
         choropleth.update_layout(updatemenus=updatemenus)
         return choropleth
